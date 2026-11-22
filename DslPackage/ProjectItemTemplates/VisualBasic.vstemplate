@@ -1,0 +1,17 @@
+﻿<!--DSL Tools Language Template-->
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<TemplateData>
+		<TemplateID>{f9bef2e2-58a5-4ff2-8528-bdc1c03cac19}</TemplateID>
+		<Name Package="{eadd3935-7efd-4f7e-b54a-f24f04ee7676}" ID="103"/>
+		<Description Package="{eadd3935-7efd-4f7e-b54a-f24f04ee7676}" ID="102"/>
+		<Icon Package="{eadd3935-7efd-4f7e-b54a-f24f04ee7676}" ID="201" />
+		<ProjectType>VisualBasic</ProjectType>
+		<SortOrder>360</SortOrder>
+		<DefaultName>RAMPACRPCMRProyectoIPS.RAMPACRPCMR_DSLProyIPS</DefaultName>
+	</TemplateData>
+	<TemplateContent>
+		<ProjectItem TargetFileName="$fileinputname$.RAMPACRPCMR_DSLProyIPS">RAMPACRPCMR_DSLProyIPS.RAMPACRPCMR_DSLProyIPS</ProjectItem>
+		<ProjectItem TargetFileName="$fileinputname$.RAMPACRPCMR_DSLProyIPS.diagram">RAMPACRPCMR_DSLProyIPS.diagram</ProjectItem>
+	</TemplateContent>
+</VSTemplate>
+

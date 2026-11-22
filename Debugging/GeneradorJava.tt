@@ -1,0 +1,332 @@
+﻿<#@ template inherits="Microsoft.VisualStudio.TextTemplating.VSHost.ModelingTextTransformation" language="C#" hostspecific="True" #>
+<#@ output extension=".txt" #><#@ RAMPACRPCMRProyectoIPS processor="RAMPACRPCMRProyectoIPSDirectiveProcessor" requires="fileName='Sample.RAMPACRPCMR_DSLProyIPS'" #>
+<#@ include file="EF.utility.CS.ttinclude" #>
+<#var fileManager = EntityFrameworkTemplateFileManager.Create(this);
+
+foreach (Clase clase in this.DiagramaClassWeb.Clases)
+{
+    fileManager.StartNewFile(clase.Nombre + ".java");
+    string modificador = "";
+    if (clase.Abstracta)
+    {
+        modificador = "abstract ";
+    }
+string herencia = "";
+if (clase.ClasePadre != null)
+{
+    herencia = " extends " + clase.ClasePadre.Nombre;
+}
+bool usaDate = false;
+Clase claseRevisada = clase;
+while (claseRevisada != null)
+{
+    foreach (Atributo a in claseRevisada.Atributo)
+    {
+        if (a.TipoDato.ToString() == "DateTime") usaDate = true;
+    }
+    claseRevisada = claseRevisada.ClasePadre;
+}
+foreach (Operacion o in clase.Operacioned)
+{
+    if (o.TipoRetorno.ToString() == "DateTime") usaDate = true;
+    foreach (Parametro p in o.Parametros)
+    {
+        if (p.Tipo.ToString() == "DateTime") usaDate = true;
+    }
+}
+if (usaDate)
+{
+#>
+import java.util.Date;
+<#
+}
+#>
+public <#= modificador #>class <#= clase.Nombre #><#= herencia #> {
+
+<#
+    foreach (Atributo atributo in clase.Atributo)
+    {
+        string tipoJava = atributo.TipoDato.ToString();
+        string nombreAtributo = atributo.Nombre.Split(':')[0].Trim();
+
+        if (tipoJava == "Int32")
+        {
+            tipoJava = "int";
+        }
+        else if (tipoJava == "Double")
+        {
+            tipoJava = "double";
+        }
+        else if (tipoJava == "Boolean")
+        {
+            tipoJava = "boolean";
+        }
+        else if (tipoJava == "Byte") tipoJava = "byte";
+        else if (tipoJava == "Char") tipoJava = "char";
+        else if (tipoJava == "Int16") tipoJava = "short";
+        else if (tipoJava == "Int64") tipoJava = "long";
+        else if (tipoJava == "DateTime")
+        {
+            tipoJava = "Date";
+        }
+        else if (tipoJava == "String")
+        {
+            tipoJava = "String";
+        }
+#>
+    private <#= tipoJava #> <#= nombreAtributo #>;
+<#
+    }
+#>
+    public <#= clase.Nombre #>() {
+    }
+<#
+    string parametrosHeredados = "";
+    string argumentosSuper = "";
+
+    Clase ancestro = clase.ClasePadre;
+
+    while (ancestro != null)
+    {
+        string parametrosNivel = "";
+        string argumentosNivel = "";
+
+        foreach (Atributo atributoHeredado in ancestro.Atributo)
+        {
+            string nombreHeredado =
+                atributoHeredado.Nombre.Split(':')[0].Trim();
+
+            string tipoHeredado =
+                atributoHeredado.TipoDato.ToString();
+
+            if (tipoHeredado == "Int32")
+                tipoHeredado = "int";
+            else if (tipoHeredado == "Double")
+                tipoHeredado = "double";
+            else if (tipoHeredado == "Boolean")
+                tipoHeredado = "boolean";
+            else if (tipoHeredado == "Byte") tipoHeredado = "byte";
+            else if (tipoHeredado == "Char") tipoHeredado = "char";
+            else if (tipoHeredado == "Int16") tipoHeredado = "short";
+            else if (tipoHeredado == "Int64") tipoHeredado = "long";
+            else if (tipoHeredado == "DateTime")
+                tipoHeredado = "Date";
+
+            if (parametrosNivel != "")
+            {
+                parametrosNivel += ", ";
+                argumentosNivel += ", ";
+            }
+
+            parametrosNivel += tipoHeredado + " " + nombreHeredado;
+            argumentosNivel += nombreHeredado;
+        }
+
+        if (parametrosNivel != "")
+        {
+            parametrosHeredados =
+                parametrosNivel +
+                (parametrosHeredados == "" ? "" : ", " + parametrosHeredados);
+
+            argumentosSuper =
+                argumentosNivel +
+                (argumentosSuper == "" ? "" : ", " + argumentosSuper);
+        }
+
+        ancestro = ancestro.ClasePadre;
+    }
+
+    string parametrosPropios = "";
+
+    foreach (Atributo atributoPropio in clase.Atributo)
+    {
+        string nombrePropio =
+            atributoPropio.Nombre.Split(':')[0].Trim();
+
+        string tipoPropio = atributoPropio.TipoDato.ToString();
+
+        if (tipoPropio == "Int32")
+            tipoPropio = "int";
+        else if (tipoPropio == "Double")
+            tipoPropio = "double";
+        else if (tipoPropio == "Boolean")
+            tipoPropio = "boolean";
+        else if (tipoPropio == "Byte") tipoPropio = "byte";
+        else if (tipoPropio == "Char") tipoPropio = "char";
+        else if (tipoPropio == "Int16") tipoPropio = "short";
+        else if (tipoPropio == "Int64") tipoPropio = "long";
+        else if (tipoPropio == "DateTime")
+            tipoPropio = "Date";
+
+        if (parametrosPropios != "")
+            parametrosPropios += ", ";
+
+        parametrosPropios += tipoPropio + " " + nombrePropio;
+    }
+
+    string parametrosTotales = parametrosHeredados;
+
+    if (parametrosPropios != "")
+    {
+        if (parametrosTotales != "")
+            parametrosTotales += ", ";
+
+        parametrosTotales += parametrosPropios;
+    }
+
+    if (parametrosTotales != "")
+    {
+#>
+    public <#= clase.Nombre #>(<#= parametrosTotales #>) {
+<#
+        if (clase.ClasePadre != null)
+        {
+#>
+        super(<#= argumentosSuper #>);
+<#
+        }
+
+        foreach (Atributo atributoPropio in clase.Atributo)
+        {
+            string nombrePropio =
+                atributoPropio.Nombre.Split(':')[0].Trim();
+#>
+        this.<#= nombrePropio #> = <#= nombrePropio #>;
+<#
+        }
+#>
+    }
+
+<#
+    }
+#>
+  
+<#
+    foreach (Atributo atributo in clase.Atributo)
+    {
+        string nombreAtributo = atributo.Nombre.Split(':')[0].Trim();
+        string nombreMetodoAcceso = nombreAtributo.Length > 0
+            ? nombreAtributo.Substring(0, 1).ToUpper() + nombreAtributo.Substring(1)
+            : nombreAtributo;
+        string tipoJava = atributo.TipoDato.ToString();
+
+        if (tipoJava == "Int32")
+        {
+            tipoJava = "int";
+        }
+        else if (tipoJava == "Double")
+        {
+            tipoJava = "double";
+        }
+        else if (tipoJava == "Boolean")
+        {
+            tipoJava = "boolean";
+        }
+        else if (tipoJava == "Byte") tipoJava = "byte";
+        else if (tipoJava == "Char") tipoJava = "char";
+        else if (tipoJava == "Int16") tipoJava = "short";
+        else if (tipoJava == "Int64") tipoJava = "long";
+        else if (tipoJava == "DateTime")
+        {
+            tipoJava = "Date";
+        }
+#>
+    public <#= tipoJava #> get<#= nombreMetodoAcceso #>() {
+        return this.<#= nombreAtributo #>;
+    }
+
+    public void set<#= nombreMetodoAcceso #>(<#= tipoJava #> <#= nombreAtributo #>) {
+        this.<#= nombreAtributo #> = <#= nombreAtributo #>;
+    }
+
+<#
+    }
+#>
+
+<#
+    foreach (Operacion op in clase.Operacioned)
+    {
+        string nombreMetodo = op.Nombre.Split('(')[0].Trim();
+
+        string tipoRetorno = op.TipoRetorno.ToString();
+
+        if (tipoRetorno == "Int32")
+            tipoRetorno = "int";
+        else if (tipoRetorno == "Double")
+            tipoRetorno = "double";
+        else if (tipoRetorno == "Boolean")
+            tipoRetorno = "boolean";
+        else if (tipoRetorno == "Byte") tipoRetorno = "byte";
+        else if (tipoRetorno == "Char") tipoRetorno = "char";
+        else if (tipoRetorno == "Int16") tipoRetorno = "short";
+        else if (tipoRetorno == "Int64") tipoRetorno = "long";
+        else if (tipoRetorno == "DateTime")
+            tipoRetorno = "Date";
+        else if (tipoRetorno == "Void" || tipoRetorno == "Nulo")
+            tipoRetorno = "void";
+
+        string parametrosJava = "";
+
+        foreach (Parametro p in op.Parametros)
+        {
+            string nombreParametro = p.Nombre.Split(':')[0].Trim();
+            string tipoParametro = p.Tipo.ToString();
+
+            if (tipoParametro == "Int32")
+                tipoParametro = "int";
+            else if (tipoParametro == "Double")
+                tipoParametro = "double";
+            else if (tipoParametro == "Boolean")
+                tipoParametro = "boolean";
+            else if (tipoParametro == "Byte") tipoParametro = "byte";
+            else if (tipoParametro == "Char") tipoParametro = "char";
+            else if (tipoParametro == "Int16") tipoParametro = "short";
+            else if (tipoParametro == "Int64") tipoParametro = "long";
+            else if (tipoParametro == "DateTime")
+                tipoParametro = "Date";
+
+            if (parametrosJava != "")
+                parametrosJava += ", ";
+
+            parametrosJava += tipoParametro + " " + nombreParametro;
+        }
+#>
+    public <#= tipoRetorno #> <#= nombreMetodo #>(<#= parametrosJava #>) {
+        // ToDo
+<#
+        if (tipoRetorno == "boolean")
+        {
+#>
+        return false;
+<#
+        }
+        else if (tipoRetorno == "int" || tipoRetorno == "double" || tipoRetorno == "byte" ||
+                 tipoRetorno == "short" || tipoRetorno == "long")
+        {
+#>
+        return 0;
+<#
+        }
+        else if (tipoRetorno == "char")
+        {
+#>
+        return ' ';
+<#
+        }
+        else if (tipoRetorno != "void")
+        {
+#>
+        return null;
+<#
+        }
+#>
+    }
+
+<#
+    }
+#>
+}
+<#
+    }
+    fileManager.Process();
+#>

@@ -1,0 +1,843 @@
+﻿<#@ template inherits="Microsoft.VisualStudio.TextTemplating.VSHost.ModelingTextTransformation" language="C#" hostspecific="True" #>
+<#@ output extension=".txt" #>
+<#@ RAMPACRPCMRProyectoIPS processor="RAMPACRPCMRProyectoIPSDirectiveProcessor" requires="fileName='Sample.RAMPACRPCMR_DSLProyIPS'" #>
+<#@ include file="EF.utility.CS.ttinclude" #>
+<#var fileManager = EntityFrameworkTemplateFileManager.Create(this);
+
+
+foreach (Clase clase in this.DiagramaClassWeb.Clases)
+{
+    if (clase.Abstracta || string.IsNullOrWhiteSpace(clase.Nombre))
+    {
+        continue;
+    }
+
+    fileManager.StartNewFile(clase.Nombre.Trim() + ".html");
+
+    
+    
+
+string fondoCss = "white";
+string letraCss = "black";
+string fuenteCss = "Arial";
+string tamanoCss = "16px";
+string alineacionCss = "left";
+string formatoCss = "";
+string estiloAtributosCss = "";
+string formatoBooleano = "Texto";
+string estiloOperacionesCss = "color:black;background-color:#eeeeee;font-family:Arial;font-size:13px;";
+
+if (clase is ClaseEnriquecida)
+{
+    ClaseEnriquecida enriquecida = (ClaseEnriquecida)clase;
+
+    if (enriquecida.EstiloClase != null)
+    {
+        EstiloClase estilo = enriquecida.EstiloClase;
+
+        
+string colorFondo = estilo.ColorFondo.ToString();
+string colorLetra = estilo.ColorLetra.ToString();
+
+switch (colorFondo)
+{
+    case "Blanco": fondoCss = "white"; break;
+    case "Negro": fondoCss = "black"; break;
+    case "Rojo": fondoCss = "red"; break;
+    case "Azul": fondoCss = "blue"; break;
+    case "Verde": fondoCss = "green"; break;
+    case "Amarillo": fondoCss = "yellow"; break;
+    case "Gris": fondoCss = "gray"; break;
+}
+
+switch (colorLetra)
+{
+    case "Blanco": letraCss = "white"; break;
+    case "Negro": letraCss = "black"; break;
+    case "Rojo": letraCss = "red"; break;
+    case "Azul": letraCss = "blue"; break;
+    case "Verde": letraCss = "green"; break;
+    case "Amarillo": letraCss = "yellow"; break;
+    case "Gris": letraCss = "gray"; break;
+}
+
+
+        string fuente = estilo.TipoLetra.ToString();
+
+        if (fuente == "TimesNewRoman")
+            fuenteCss = "'Times New Roman'";
+        else if (fuente == "CourierNew")
+            fuenteCss = "'Courier New'";
+        else
+            fuenteCss = fuente;
+
+        if (estilo.TamanoLetra > 0)
+            tamanoCss = estilo.TamanoLetra.ToString(
+                System.Globalization.CultureInfo.InvariantCulture) + "px";
+
+        string alineacion = estilo.Alineacion.ToString();
+
+        if (alineacion == "Centro")
+            alineacionCss = "center";
+        else if (alineacion == "Derecha")
+            alineacionCss = "right";
+        else
+            alineacionCss = "left";
+
+        string formato = estilo.FormatoLetra.ToString();
+
+        if (formato == "Negrita")
+            formatoCss = "font-weight:bold;";
+        else if (formato == "Cursiva")
+            formatoCss = "font-style:italic;";
+        else if (formato == "Subrayada")
+            formatoCss = "text-decoration:underline;";
+
+            
+
+foreach (EstiloAtributo ea in estilo.EstiloAtributo)
+{
+formatoBooleano = ea.FormatoBooleano.ToString();
+    string colorAtributo = ea.ColorLetra.ToString();
+
+    if (colorAtributo == "Negro")
+        colorAtributo = "black";
+    else if (colorAtributo == "Blanco")
+        colorAtributo = "white";
+    else if (colorAtributo == "Azul")
+        colorAtributo = "blue";
+    else if (colorAtributo == "Rojo")
+        colorAtributo = "red";
+    else if (colorAtributo == "Verde")
+        colorAtributo = "green";
+    else if (colorAtributo == "Amarillo")
+        colorAtributo = "yellow";
+    else if (colorAtributo == "Gris")
+        colorAtributo = "gray";
+
+    string fuenteAtributo = ea.TipoLetra.ToString();
+
+    if (fuenteAtributo == "TimesNewRoman")
+        fuenteAtributo = "'Times New Roman'";
+    else if (fuenteAtributo == "CourierNew")
+        fuenteAtributo = "'Courier New'";
+
+    string formatoAtributo = ea.FormatoLetra.ToString();
+    string decoracion = "";
+
+    if (formatoAtributo == "Subrayada")
+        decoracion = "text-decoration:underline;";
+    else if (formatoAtributo == "Negrita")
+        decoracion = "font-weight:bold;";
+    else if (formatoAtributo == "Cursiva")
+        decoracion = "font-style:italic;";
+
+    estiloAtributosCss =
+        "color:" + colorAtributo + ";" +
+        "font-family:" + fuenteAtributo + ";" +
+        "font-size:" + ea.TamanoLetra.ToString(
+            System.Globalization.CultureInfo.InvariantCulture) + "px;" +
+        decoracion;
+}
+
+foreach (EstiloOperacion eo in estilo.EstiloOperacion)
+{
+    string fondoOp = eo.ColorFondo.ToString();
+    string letraOp = eo.ColorLetra.ToString();
+
+    switch (fondoOp)
+    {
+        case "Blanco": fondoOp = "white"; break;
+        case "Negro": fondoOp = "black"; break;
+        case "Rojo": fondoOp = "red"; break;
+        case "Azul": fondoOp = "blue"; break;
+        case "Verde": fondoOp = "green"; break;
+        case "Amarillo": fondoOp = "yellow"; break;
+        case "Gris": fondoOp = "gray"; break;
+    }
+
+    switch (letraOp)
+    {
+        case "Blanco": letraOp = "white"; break;
+        case "Negro": letraOp = "black"; break;
+        case "Rojo": letraOp = "red"; break;
+        case "Azul": letraOp = "blue"; break;
+        case "Verde": letraOp = "green"; break;
+        case "Amarillo": letraOp = "yellow"; break;
+        case "Gris": letraOp = "gray"; break;
+    }
+
+    string fuenteOp = eo.TipoLetra.ToString();
+
+    if (fuenteOp == "TimesNewRoman")
+        fuenteOp = "'Times New Roman'";
+    else if (fuenteOp == "CourierNew")
+        fuenteOp = "'Courier New'";
+
+    string formatoOp = eo.FormatoLetra.ToString();
+    string decoracionOp = "";
+
+    if (formatoOp == "Negrita")
+        decoracionOp = "font-weight:bold;";
+    else if (formatoOp == "Cursiva")
+        decoracionOp = "font-style:italic;";
+    else if (formatoOp == "Subrayada")
+        decoracionOp = "text-decoration:underline;";
+
+    estiloOperacionesCss =
+        "color:" + letraOp + ";" +
+        "background-color:" + fondoOp + ";" +
+        "font-family:" + fuenteOp + ";" +
+        "font-size:" + eo.TamanoLetra.ToString(
+            System.Globalization.CultureInfo.InvariantCulture) + "px;" +
+        decoracionOp;
+}
+
+
+    }
+}
+
+
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title><#= clase.Nombre #></title>
+</head>
+<body>
+    
+<div style="border:1px solid black; margin:20px; background-color:<#= fondoCss #>; color:<#= letraCss #>; font-family:<#= fuenteCss #>; font-size:<#= tamanoCss #>; text-align:<#= alineacionCss #>; <#= formatoCss #>">
+
+        
+
+<h1 style="color:<#= letraCss #>; font-size:inherit; font-weight:inherit;"><#= clase.Nombre #></h1>
+
+
+<a href="./<#= clase.Nombre #>Alta.html" style="color:<#= letraCss #>;">            Alta
+        </a>
+
+<a href="./<#= clase.Nombre #>Listado.html" style="color:<#= letraCss #>;">Listado</a>    
+
+<button type="button"
+        style="<#= estiloOperacionesCss #>"
+        onclick="location.href='./MenuAplicacion.html'">
+    Volver al menú
+</button>
+
+</div>
+</body>
+
+</html>
+<#
+    fileManager.StartNewFile(clase.Nombre + "Alta.html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alta <#= clase.Nombre #></title>
+</head>
+<body>
+    
+<div style="border:1px solid black; margin:20px; background-color:<#= fondoCss #>; color:<#= letraCss #>; font-family:<#= fuenteCss #>; font-size:<#= tamanoCss #>; text-align:<#= alineacionCss #>; <#= formatoCss #>">
+
+
+        <h1>Alta <#= clase.Nombre #></h1>
+
+        <form name="<#= clase.Nombre #>">
+            <table>
+<#
+    foreach (Atributo atributo in clase.Atributo)
+    {
+        string nombreAtributo = atributo.Nombre.Split(':')[0].Trim();
+#>
+                <tr>
+                    <td>
+                        <label for="<#= nombreAtributo #>" style="<#= estiloAtributosCss #>">
+                            <#= nombreAtributo #>:
+                        </label>
+                    </td>
+                    <td>
+                        
+
+<#
+    bool esBooleano = atributo.TipoDato.ToString() == "Boolean";
+
+    if (esBooleano && formatoBooleano == "Checkbox")
+    {
+#>
+        <input type="checkbox"
+               id="<#= nombreAtributo #>"
+               name="<#= nombreAtributo #>"
+               style="<#= estiloAtributosCss #>">
+<#
+    }
+    else if (esBooleano &&
+             (formatoBooleano == "Radiobutton" ||
+              formatoBooleano == "RadioButton"))
+    {
+#>
+        <input type="radio"
+               name="<#= nombreAtributo #>"
+               value="true"> Si
+
+        <input type="radio"
+               name="<#= nombreAtributo #>"
+               value="false"> No
+<#
+    }
+    else
+    {
+#>
+        <input type="text"
+               id="<#= nombreAtributo #>"
+               name="<#= nombreAtributo #>"
+               style="<#= estiloAtributosCss #>">
+<#
+    }
+#>
+
+
+                    </td>
+                </tr>
+<#
+    }
+#>
+
+<#
+    Clase padre = clase.ClasePadre;
+
+    while (padre != null)
+    {
+        foreach (Atributo atributoHeredado in padre.Atributo)
+        {
+            string nombreHeredado =
+                atributoHeredado.Nombre.Split(':')[0].Trim();
+#>
+                <tr>
+                    <td>
+                        <label for="<#= nombreHeredado #>" style="<#= estiloAtributosCss #>">
+                            <#= nombreHeredado #>:
+                        </label>
+                    </td>
+                    <td>
+                        
+
+<#
+    bool esBooleanoHeredado =
+        atributoHeredado.TipoDato.ToString() == "Boolean";
+
+    if (esBooleanoHeredado && formatoBooleano == "Checkbox")
+    {
+#>
+        <input type="checkbox"
+               id="<#= nombreHeredado #>"
+               name="<#= nombreHeredado #>"
+               style="<#= estiloAtributosCss #>">
+<#
+    }
+    else if (esBooleanoHeredado &&
+             (formatoBooleano == "Radiobutton" ||
+              formatoBooleano == "RadioButton"))
+    {
+#>
+        <input type="radio"
+               name="<#= nombreHeredado #>"
+               value="true"> Si
+
+        <input type="radio"
+               name="<#= nombreHeredado #>"
+               value="false"> No
+<#
+    }
+    else
+    {
+#>
+        <input type="text"
+               id="<#= nombreHeredado #>"
+               name="<#= nombreHeredado #>"
+               style="<#= estiloAtributosCss #>">
+<#
+    }
+#>
+
+
+                    </td>
+                </tr>
+<#
+        }
+
+        padre = padre.ClasePadre;
+    }
+#>
+
+            </table>
+
+            
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Guardar</button>
+
+            
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Volver</button>
+
+
+        </form>
+    </div>
+
+</body>
+</html>
+
+<#
+    fileManager.StartNewFile(clase.Nombre + "Listado.html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de <#= clase.Nombre #></title>
+</head>
+<body>
+    
+<div style="border:1px solid black; margin:20px; background-color:<#= fondoCss #>; color:<#= letraCss #>; font-family:<#= fuenteCss #>; font-size:<#= tamanoCss #>; text-align:<#= alineacionCss #>; <#= formatoCss #>">
+
+
+        <h2>Listado de <#= clase.Nombre #></h2>
+
+        <table>
+<#
+    for (int i = 0; i < 2; i++)
+    {
+        if (i == 1)
+        {
+#>
+            <tr>
+                <td>...</td>
+            </tr>
+<#
+        }
+#>
+            <tr>
+                <td>
+                    <#= clase.Nombre #> <#= i == 0 ? "1" : "N" #>
+                </td>
+                <td>
+                    
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Consultar</button>
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Modificar</button>
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Eliminar</button>
+
+
+<#
+        foreach (Operacion op in clase.Operacioned)
+        {
+            string nombreMetodo = op.Nombre.Split('(')[0].Trim();
+#>
+                    
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'"><#= nombreMetodo #></button>
+
+<#
+        }
+#>
+
+<#
+        Clase padreLista = clase.ClasePadre;
+
+        while (padreLista != null)
+        {
+            foreach (Operacion opHeredada in padreLista.Operacioned)
+            {
+                string metodoHeredado = opHeredada.Nombre.Split('(')[0].Trim();
+#>
+                
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'"><#= metodoHeredado #></button>
+
+<#
+            }
+
+            padreLista = padreLista.ClasePadre;
+        }
+#>
+
+                </td>
+            </tr>
+<#
+    }
+#>
+        </table>
+
+        
+<button type="button" style="<#= estiloOperacionesCss #>" onclick="location.href='./<#= clase.Nombre #>.html'">Volver</button>
+
+
+    </div>
+</body>
+</html>
+
+
+<#
+}
+
+foreach (Clase origen in this.DiagramaClassWeb.Clases)
+{
+    foreach (ClaseReferencesClase relacion in
+        ClaseReferencesClase.GetLinksToReferenciaTarget(origen))
+    {
+        string cardOrigen = relacion.CardOrigen.ToString();
+        string cardDestino = relacion.CardDestino.ToString();
+
+        bool muchosOrigen =
+            cardOrigen == "Card_0_n" ||
+            cardOrigen == "Card_1_n" ||
+            cardOrigen == "Card_m_n";
+
+        bool muchosDestino =
+            cardDestino == "Card_0_n" ||
+            cardDestino == "Card_1_n" ||
+            cardDestino == "Card_m_n";
+
+        if (!muchosOrigen || !muchosDestino)
+            continue;
+
+        Clase destino = relacion.TargetClase;
+
+        if (destino == null)
+            continue;
+
+        string nombreRelacion = relacion.Nombre;
+        
+if (string.IsNullOrWhiteSpace(nombreRelacion))
+{
+    continue;
+}
+
+
+        string idOrigen = "";
+
+        Clase actualOrigen = origen;
+        while (actualOrigen != null && idOrigen == "")
+        {
+            foreach (Atributo atributo in actualOrigen.Atributo)
+            {
+                if (atributo.EsId)
+                {
+                    idOrigen = atributo.Nombre.Split(':')[0].Trim();
+                    break;
+                }
+            }
+            actualOrigen = actualOrigen.ClasePadre;
+        }
+
+        string idDestino = "";
+
+        Clase actualDestino = destino;
+        while (actualDestino != null && idDestino == "")
+        {
+            foreach (Atributo atributo in actualDestino.Atributo)
+            {
+                if (atributo.EsId)
+                {
+                    idDestino = atributo.Nombre.Split(':')[0].Trim();
+                    break;
+                }
+            }
+            actualDestino = actualDestino.ClasePadre;
+        }
+
+        if (idOrigen == "" || idDestino == "")
+            continue;
+
+        fileManager.StartNewFile(nombreRelacion + ".html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title><#= nombreRelacion #></title>
+</head>
+<body>
+    <div style="border:1px solid black; margin:20px; padding:15px;">
+        <h1><#= nombreRelacion #></h1>
+
+        <a href="./<#= nombreRelacion #>Alta.html">Alta</a>
+        <a href="./<#= nombreRelacion #>Listado.html">Listado</a>
+        
+<button type="button"
+        onclick="location.href='./MenuAplicacion.html'">
+    Volver al menú
+</button>
+
+    </div>
+</body>
+</html>
+
+<#
+        fileManager.StartNewFile(nombreRelacion + "Alta.html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alta <#= nombreRelacion #></title>
+</head>
+<body>
+    <div style="border:1px solid black; margin:20px; padding:15px;">
+        <h1>Alta <#= nombreRelacion #></h1>
+
+        <form name="<#= nombreRelacion #>">
+            <table>
+                <tr>
+                    <td>
+                        <label for="<#= idOrigen #>">
+                            <#= origen.Nombre #> - <#= idOrigen #>:
+                        </label>
+                    </td>
+                    <td>
+                        <input type="text"
+                               id="<#= idOrigen #>"
+                               name="<#= idOrigen #>">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <label for="<#= idDestino #>">
+                            <#= destino.Nombre #> - <#= idDestino #>:
+                        </label>
+                    </td>
+                    <td>
+                        <input type="text"
+                               id="<#= idDestino #>"
+                               name="<#= idDestino #>">
+                    </td>
+                </tr>
+            </table>
+
+            <button type="button"
+                    onclick="location.href='./<#= nombreRelacion #>.html'">
+                Guardar
+            </button>
+
+            <button type="button"
+                    onclick="location.href='./<#= nombreRelacion #>.html'">
+                Volver
+            </button>
+        </form>
+    </div>
+</body>
+</html>
+
+<#
+        fileManager.StartNewFile(nombreRelacion + "Listado.html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de <#= nombreRelacion #></title>
+</head>
+<body>
+    <div style="border:1px solid black; margin:20px; padding:15px;">
+        <h2>Listado de <#= nombreRelacion #></h2>
+
+        <table>
+<#
+        for (int i = 0; i < 2; i++)
+        {
+            if (i == 1)
+            {
+#>
+            <tr>
+                <td>...</td>
+            </tr>
+<#
+            }
+#>
+            <tr>
+                <td>
+                    <#= nombreRelacion #> <#= i == 0 ? "1" : "N" #>
+                </td>
+                <td>
+                    <button type="button"
+                            onclick="location.href='./<#= nombreRelacion #>.html'">Consultar</button>
+
+                    <button type="button"
+                            onclick="location.href='./<#= nombreRelacion #>.html'">Modificar</button>
+
+                    <button type="button"
+                            onclick="location.href='./<#= nombreRelacion #>.html'">Eliminar</button>
+                </td>
+            </tr>
+<#
+        }
+#>
+        </table>
+
+        <button type="button"
+                onclick="location.href='./<#= nombreRelacion #>.html'">
+            Volver
+        </button>
+    </div>
+</body>
+</html>
+
+
+<#
+    }
+}
+
+fileManager.StartNewFile("MenuAplicacion.html");
+#>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Clases Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+        }
+
+        .menu {
+            background-color: #C2D8F2;
+            border: 1px solid #888;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #172E4D;
+        }
+
+        a {
+            color: blue;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        button {
+            margin-top: 12px;
+            padding: 5px 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="menu">
+
+    <h1>Gestión de Clases Web</h1>
+
+    <h2>Clases</h2>
+
+    <ul>
+<#
+foreach (Clase claseMenu in this.DiagramaClassWeb.Clases)
+{
+    if (claseMenu.Abstracta ||
+        string.IsNullOrWhiteSpace(claseMenu.Nombre))
+    {
+        continue;
+    }
+#>
+        <li>
+            <a href="./<#= claseMenu.Nombre.Trim() #>.html">
+                <#= claseMenu.Nombre.Trim() #>
+            </a>
+        </li>
+<#
+}
+#>
+    </ul>
+
+    <h2>Asociaciones N:M</h2>
+
+    <ul>
+<#
+foreach (Clase origenMenu in this.DiagramaClassWeb.Clases)
+{
+    foreach (ClaseReferencesClase relacionMenu in
+        ClaseReferencesClase.GetLinksToReferenciaTarget(origenMenu))
+    {
+        string cardOrigenMenu =
+            relacionMenu.CardOrigen.ToString();
+
+        string cardDestinoMenu =
+            relacionMenu.CardDestino.ToString();
+
+        bool muchosOrigenMenu =
+            cardOrigenMenu == "Card_0_n" ||
+            cardOrigenMenu == "Card_1_n" ||
+            cardOrigenMenu == "Card_m_n";
+
+        bool muchosDestinoMenu =
+            cardDestinoMenu == "Card_0_n" ||
+            cardDestinoMenu == "Card_1_n" ||
+            cardDestinoMenu == "Card_m_n";
+
+        if (!muchosOrigenMenu || !muchosDestinoMenu)
+            continue;
+
+        if (relacionMenu.TargetClase == null ||
+            string.IsNullOrWhiteSpace(relacionMenu.Nombre))
+            continue;
+
+        bool tieneIdOrigen = false;
+        Clase origenActual = origenMenu;
+
+        while (origenActual != null && !tieneIdOrigen)
+        {
+            foreach (Atributo a in origenActual.Atributo)
+            {
+                if (a.EsId)
+                {
+                    tieneIdOrigen = true;
+                    break;
+                }
+            }
+            origenActual = origenActual.ClasePadre;
+        }
+
+        bool tieneIdDestino = false;
+        Clase destinoActual = relacionMenu.TargetClase;
+
+        while (destinoActual != null && !tieneIdDestino)
+        {
+            foreach (Atributo a in destinoActual.Atributo)
+            {
+                if (a.EsId)
+                {
+                    tieneIdDestino = true;
+                    break;
+                }
+            }
+            destinoActual = destinoActual.ClasePadre;
+        }
+
+        if (!tieneIdOrigen || !tieneIdDestino)
+            continue;
+
+        string nombreMenuRelacion = relacionMenu.Nombre;
+#>
+        <li>
+            <a href="./<#= nombreMenuRelacion #>.html">
+                <#= nombreMenuRelacion #>
+            </a>
+        </li>
+<#
+    }
+}
+#>
+    </ul>
+
+    <button type="button" onclick="window.close()">
+        Cerrar
+    </button>
+
+</div>
+</body>
+</html>
+
+<#
+fileManager.Process();
+#>
